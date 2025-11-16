@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: kostan_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: kostan_db
+      POSTGRES_USER: kostan_admin
+      POSTGRES_PASSWORD: kostan_password_2024
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kostan_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  kostan_network:
+    driver: bridge
