@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull, Not } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import { FilterUsersDto } from './dto/filter-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,8 +16,57 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(filters?: FilterUsersDto): Promise<User[]> {
+    const where: any = {};
+
+    // Filter by role if provided
+    if (filters?.role) {
+      where.role = filters.role;
+    }
+
+    // Filter by room assignment status
+    if (filters?.roomStatus === 'assigned') {
+      // Users who have a room assigned (have rentedRoom relation)
+      return await this.usersRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.rentedRoom', 'room')
+        .where('room.id IS NOT NULL')
+        .andWhere(filters?.role ? 'user.role = :role' : '1=1', { role: filters?.role })
+        .select([
+          'user.id',
+          'user.email',
+          'user.fullName',
+          'user.phone',
+          'user.role',
+          'user.isActive',
+          'user.createdAt',
+          'room.id',
+          'room.name',
+          'room.price',
+        ])
+        .getMany();
+    } else if (filters?.roomStatus === 'unassigned') {
+      // Users who don't have a room assigned
+      return await this.usersRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.rentedRoom', 'room')
+        .where('room.id IS NULL')
+        .andWhere(filters?.role ? 'user.role = :role' : '1=1', { role: filters?.role })
+        .select([
+          'user.id',
+          'user.email',
+          'user.fullName',
+          'user.phone',
+          'user.role',
+          'user.isActive',
+          'user.createdAt',
+        ])
+        .getMany();
+    }
+
+    // No room status filter - return all users matching role filter
     return await this.usersRepository.find({
+      where,
       select: ['id', 'email', 'fullName', 'phone', 'role', 'isActive', 'createdAt'],
     });
   }

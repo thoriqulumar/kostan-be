@@ -36,10 +36,30 @@ export class RoomsService {
 
     async findAll(): Promise<Room[]> {
         return await this.roomsRepository.find({
-            select: ['id', 'name', 'rentedUserId', 'rentStartDate', 'price', 'isActive', 'createdAt', 'updatedAt'],
-            order:{
+            select: {
+                id: true,
+                name: true,
+                rentedUserId: true,
+                rentStartDate: true,
+                price: true,
+                isActive: true,
+                createdAt: true,
+                updatedAt: true,
+                rentedUser: {
+                    id: true,
+                    email: true,
+                    fullName: true,
+                    phone: true,
+                    role: true,
+                    isActive: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            },
+            order: {
                 createdAt: 'DESC'
-            }
+            },
+            relations: ['rentedUser'],
         });
     }
 

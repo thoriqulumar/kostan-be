@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RoomsModule } from './rooms/rooms.module';
-// import { RentalsModule } from './rentals/rentals.module';
+import { RentalsModule } from './rentals/rentals.module';
 // import { PaymentsModule } from './payments/payments.module';
 // import { ExpensesModule } from './expenses/expenses.module';
 // import { NotificationsModule } from './notifications/notifications.module';
@@ -27,7 +27,7 @@ import { RoomsModule } from './rooms/rooms.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true, // Set to false in production!
+        synchronize: configService.get('ENV') == 'PRODUCTION' ? false : true , // Set to false in production!
         logging: true,
       }),
       inject: [ConfigService],
@@ -37,7 +37,7 @@ import { RoomsModule } from './rooms/rooms.module';
     AuthModule,
     UsersModule,
     RoomsModule,
-    // RentalsModule,
+    RentalsModule,
     // PaymentsModule,
     // ExpensesModule,
     // NotificationsModule,

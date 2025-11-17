@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,12 +14,14 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/auth.decorators';
 import { UserRole } from './entities/user.entity';
+import { FilterUsersDto } from './dto/filter-users.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('JWT-auth')
@@ -54,7 +57,19 @@ export class UsersController {
   // Admin only: Get all users
   @Get()
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get all users (Admin only)' })
+  @ApiOperation({ summary: 'Get all users with optional filters (Admin only)' })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: UserRole,
+    description: 'Filter by user role',
+  })
+  @ApiQuery({
+    name: 'roomStatus',
+    required: false,
+    enum: ['assigned', 'unassigned'],
+    description: 'Filter by room assignment status',
+  })
   @ApiResponse({
     status: 200,
     description: 'Returns list of all users',
@@ -75,8 +90,8 @@ export class UsersController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
-  async findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() filters: FilterUsersDto) {
+    return this.usersService.findAll(filters);
   }
 
   // Admin only: Get specific user
