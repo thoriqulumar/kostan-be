@@ -2,15 +2,23 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room } from '../rooms/entities/rooms.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class RentalsService {
   constructor(
     @InjectRepository(Room)
     private roomsRepository: Repository<Room>,
+    private usersService: UsersService,
   ) {}
 
   async assignUserToRoom(roomId: string, userId: string): Promise<Room> {
+    // Validate user exists
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
     // Find the room
     const room = await this.roomsRepository.findOne({
       where: { id: roomId },
@@ -55,13 +63,19 @@ export class RentalsService {
   }
 
   async unassignUserFromRoom(userId: string): Promise<Room> {
+    // Validate user exists
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
     // Find the room rented by user
     const room = await this.roomsRepository.findOne({
       where: { rentedUserId: userId },
     });
 
     if (!room) {
-      throw new NotFoundException('You are not renting any room');
+      throw new NotFoundException('User is not renting any room');
     }
 
     // Remove user from room
@@ -69,5 +83,5 @@ export class RentalsService {
     room.rentStartDate = null as any;
 
     return await this.roomsRepository.save(room);
-   }
+  }
 }

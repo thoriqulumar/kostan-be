@@ -33,6 +33,26 @@ export class RoomsController {
 
     @Post()
     @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Create a new room (Admin only)' })
+    @ApiResponse({
+        status: 201,
+        description: 'Room created successfully',
+        schema: {
+            example: {
+                id: '123e4567-e89b-12d3-a456-426614174000',
+                name: 'Room A1',
+                price: 12012,
+                rentedUserId: null,
+                rentStartDate: null,
+                isActive: true,
+                createdAt: '2025-11-17T10:00:00.000Z',
+                updatedAt: '2025-11-17T10:00:00.000Z',
+            },
+        },
+    })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async create(@Body() createRoomDto: CreateRoomDto) {
         console.log({ createRoomDto })
         return this.roomsService.create(createRoomDto);
@@ -40,19 +60,85 @@ export class RoomsController {
 
     @Put(':id')
     @Roles(UserRole.ADMIN)
-    async(@Param('id') id, @Body() updateRoomDto: UpdateRoomDto) {
+    @ApiOperation({ summary: 'Update room details (Admin only)' })
+    @ApiParam({ name: 'id', description: 'Room ID (UUID)', type: 'string' })
+    @ApiResponse({
+        status: 200,
+        description: 'Room updated successfully',
+        schema: {
+            example: {
+                id: '123e4567-e89b-12d3-a456-426614174000',
+                name: 'Room A1 Updated',
+                price: 15000,
+                rentedUserId: null,
+                rentStartDate: null,
+                isActive: true,
+                createdAt: '2025-11-17T10:00:00.000Z',
+                updatedAt: '2025-11-17T11:00:00.000Z',
+            },
+        },
+    })
+    @ApiResponse({ status: 400, description: 'Bad request - Invalid input data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Room not found' })
+    async update(@Param('id') id, @Body() updateRoomDto: UpdateRoomDto) {
         return this.roomsService.update(id, updateRoomDto)
     }
 
     @Get()
     @Roles(UserRole.ADMIN)
-    @ApiOperation({ summary: 'Get all rooms by admin' })
+    @ApiOperation({ summary: 'Get all rooms with rented user details (Admin only)' })
+    @ApiResponse({
+        status: 200,
+        description: 'Returns list of all rooms',
+        schema: {
+            example: [
+                {
+                    id: '123e4567-e89b-12d3-a456-426614174000',
+                    name: 'Room A1',
+                    price: 12012,
+                    rentedUserId: '987e6543-e21b-12d3-a456-426614174999',
+                    rentStartDate: '2025-11-17T10:00:00.000Z',
+                    isActive: true,
+                    createdAt: '2025-11-17T09:00:00.000Z',
+                    updatedAt: '2025-11-17T10:00:00.000Z',
+                    rentedUser: {
+                        id: '987e6543-e21b-12d3-a456-426614174999',
+                        email: 'user@example.com',
+                        fullName: 'John Doe',
+                        phone: '+1234567890',
+                        role: 'user',
+                        isActive: true,
+                        createdAt: '2025-11-17T08:00:00.000Z',
+                        updatedAt: '2025-11-17T08:00:00.000Z',
+                    },
+                },
+            ],
+        },
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async getRooms() {
         return this.roomsService.findAll();
     }
 
     @Delete(':id')
     @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Delete a room (Admin only)' })
+    @ApiParam({ name: 'id', description: 'Room ID (UUID)', type: 'string' })
+    @ApiResponse({
+        status: 200,
+        description: 'Room deleted successfully',
+        schema: {
+            example: {
+                message: 'Room deleted successfully',
+            },
+        },
+    })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+    @ApiResponse({ status: 404, description: 'Room not found' })
     async delete(@Param('id') id: string) {
         await this.roomsService.delete(id);
         return { message: 'Room deleted successfully' };
