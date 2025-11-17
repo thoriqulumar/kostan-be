@@ -4,10 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
+import { Room } from '../../rooms/entities/rooms.entity';
 
 export enum UserRole {
   USER = 'user',
@@ -90,4 +91,7 @@ export class User {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Room, (room) => room.rentedUser)
+  rentedRoom: Room;
 }

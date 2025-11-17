@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-// import { RoomsModule } from './rooms/rooms.module';
+import { RoomsModule } from './rooms/rooms.module';
 // import { RentalsModule } from './rentals/rentals.module';
 // import { PaymentsModule } from './payments/payments.module';
 // import { ExpensesModule } from './expenses/expenses.module';
@@ -36,7 +36,7 @@ import { UsersModule } from './users/users.module';
     // Feature Modules
     AuthModule,
     UsersModule,
-    // RoomsModule,
+    RoomsModule,
     // RentalsModule,
     // PaymentsModule,
     // ExpensesModule,
