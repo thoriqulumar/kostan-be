@@ -12,7 +12,7 @@ export class RentalsService {
     private usersService: UsersService,
   ) {}
 
-  async assignUserToRoom(roomId: string, userId: string): Promise<Room> {
+  async assignUserToRoom(roomId: string, userId: string, rentStartDate: string): Promise<Room> {
     // Validate user exists
     const user = await this.usersService.findOne(userId);
     if (!user) {
@@ -33,9 +33,9 @@ export class RentalsService {
       throw new BadRequestException('Room is already rented by another user');
     }
 
-    // Assign user to room and set rent start date
+    // Assign user to room and set rent start date from request
     room.rentedUserId = userId;
-    room.rentStartDate = new Date();
+    room.rentStartDate = new Date(rentStartDate);
 
     return await this.roomsRepository.save(room);
   }

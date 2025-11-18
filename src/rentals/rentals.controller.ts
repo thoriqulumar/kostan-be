@@ -40,7 +40,11 @@ export class RentalsController {
     @ApiResponse({ status: 400, description: 'Room already rented' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async rentRoom(@Body() assignRoomDto: AssignRoomDto) {
-        return this.rentalService.assignUserToRoom(assignRoomDto.roomId, assignRoomDto.userId);
+        return this.rentalService.assignUserToRoom(
+            assignRoomDto.roomId,
+            assignRoomDto.userId,
+            assignRoomDto.rentStartDate
+        );
     }
 
     @Post('unassign')

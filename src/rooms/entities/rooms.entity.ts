@@ -26,7 +26,7 @@ export class Room {
     @Column({ nullable: true })
     rentedUserId: string;
 
-    @Column({ type: 'timestamp', nullable: true })
+    @Column({ type: 'date', nullable: true })
     rentStartDate: Date;
 
     @Column()
