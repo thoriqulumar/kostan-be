@@ -65,8 +65,7 @@ export class NotificationsService {
     const currentYear = currentDate.getFullYear();
     const currentDay = currentDate.getDate();
     console.log({currentDay})
-    const reminderDay = this.configService.get<number>('PAYMENT_REMINDER_DAY') || 3;
-    console.log({reminderDay})
+
     for (const room of rentedRooms) {
       console.log({room})
       if (!room.rentedUser || !room.rentStartDate) {
@@ -77,8 +76,13 @@ export class NotificationsService {
       console.log({rentStartDate})
       const rentStartDay = rentStartDate.getDate();
       console.log({rentStartDay})
-      // Check if today is the reminder day for this user
-      if (currentDay != reminderDay) {
+
+      // Check if today matches this user's rent start day
+      // Each user gets reminder on their individual rent start date day each month
+      if (currentDay != rentStartDay) {
+        this.logger.debug(
+          `Skipping ${room.rentedUser.email}: Today is ${currentDay}, rent day is ${rentStartDay}`,
+        );
         continue;
       }
 
@@ -145,8 +149,12 @@ export class NotificationsService {
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
 
-    const title = 'Payment Reminder';
-    const message = `This is a reminder to upload your payment receipt for ${monthNames[month - 1]} ${year}. Room: ${room.name}. Amount: Rp ${room.price.toLocaleString()}. Due date: ${rentStartDay} ${monthNames[month - 1]} ${year}.`;
+    const title = 'Pengingat Pembayaran Kost';
+    const message = `Ini adalah notifikasi pengingat untuk melakukan pembayaran kos pada.
+      <br>Bulan: <b>${monthNames[month - 1]} ${year}</b>.
+      <br>Kamar: <b>${room.name}</b>.
+      <br>Jumlah Yang Dibayarkan: <b>Rp ${room.price.toLocaleString('id-ID')}</b>.
+      <br>Tenggat Waktu: <b>${rentStartDay} ${monthNames[month - 1]} ${year}</b>.`;
 
     // Create notification in database (will be sent via WebSocket)
     const notification = await this.createNotification(
@@ -167,11 +175,11 @@ export class NotificationsService {
           subject: title,
           html: `
             <h2>Payment Reminder</h2>
-            <p>Dear ${user.fullName},</p>
+            <p>Hi ${user.fullName},</p>
             <p>${message}</p>
-            <p>Please upload your payment receipt through the system as soon as possible.</p>
+            <p>Tolong upload bukti pembayaran via website setelah pembayaran selesai dilakukan.</p>
             <br>
-            <p>Thank you!</p>
+            <p>Terima kasih!</p>
           `,
         });
 
