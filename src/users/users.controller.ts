@@ -35,7 +35,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
     status: 200,
-    description: 'Returns the current user profile',
+    description: 'Returns the current user profile with rented room information',
     schema: {
       example: {
         id: '123e4567-e89b-12d3-a456-426614174000',
@@ -45,7 +45,12 @@ export class UsersController {
         role: 'USER',
         isActive: true,
         createdAt: '2025-11-17T10:30:00.000Z',
-        updatedAt: '2025-11-17T10:30:00.000Z',
+        rentedRoom: {
+          id: '987e6543-e21b-12d3-a456-426614174999',
+          name: 'Room A1',
+          price: 1500000,
+          rentStartDate: '2025-11-17',
+        },
       },
     },
   })

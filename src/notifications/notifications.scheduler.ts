@@ -12,7 +12,7 @@ export class NotificationsScheduler {
     private readonly configService: ConfigService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_9AM)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handlePaymentReminders() {
     this.logger.log('Running daily payment reminder check...');
 

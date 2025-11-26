@@ -72,10 +72,24 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      select: ['id', 'email', 'fullName', 'phone', 'role', 'isActive', 'createdAt'],
-    });
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rentedRoom', 'room')
+      .where('user.id = :id', { id })
+      .select([
+        'user.id',
+        'user.email',
+        'user.fullName',
+        'user.phone',
+        'user.role',
+        'user.isActive',
+        'user.createdAt',
+        'room.id',
+        'room.name',
+        'room.price',
+        'room.rentStartDate',
+      ])
+      .getOne();
 
     if (!user) {
       throw new NotFoundException('User not found');

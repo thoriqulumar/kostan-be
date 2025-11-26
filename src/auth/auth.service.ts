@@ -148,4 +148,18 @@ export class AuthService {
   async validateUser(userId: string) {
     return await this.usersService.findOne(userId);
   }
+
+  async logout(userId: string) {
+    // In a stateless JWT system, logout is primarily handled client-side
+    // by discarding the token. This endpoint can be used for:
+    // 1. Logging the logout event for audit purposes
+    // 2. Future token blacklisting implementation if needed
+
+    // Optional: Log logout event
+    console.log(`User ${userId} logged out at ${new Date().toISOString()}`);
+
+    return {
+      message: 'Logout successful',
+    };
+  }
 }

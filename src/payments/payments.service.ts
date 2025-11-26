@@ -213,12 +213,14 @@ export class PaymentsService {
 
   async getIncomeReport(year?: number): Promise<Income[]> {
     const query = this.incomeRepository.createQueryBuilder('income');
-
+    console.log({query})
     if (year) {
       query.where('income.paymentYear = :year', { year });
     }
 
     return query
+      .leftJoinAndSelect('income.user','user')
+      .leftJoinAndSelect('income.room', 'room')
       .orderBy('income.paymentYear', 'DESC')
       .addOrderBy('income.paymentMonth', 'DESC')
       .getMany();
