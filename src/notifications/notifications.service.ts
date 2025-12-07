@@ -12,7 +12,7 @@ import * as nodemailer from 'nodemailer';
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
   private transporter: nodemailer.Transporter;
-  private gateway: any; // Will be set by the gateway
+  private sseService: any; // Will be set by the module
 
   constructor(
     @InjectRepository(Notification)
@@ -230,12 +230,12 @@ export class NotificationsService {
     );
   }
 
-  // Method to set the gateway (called by the gateway on init)
-  setGateway(gateway: any) {
-    this.gateway = gateway;
+  // Method to set the SSE service (called by the module on init)
+  setSseService(sseService: any) {
+    this.sseService = sseService;
   }
 
-  // Method to create a notification and emit it via WebSocket
+  // Method to create a notification and emit it via SSE
   async createNotification(
     userId: string,
     type: NotificationType,
@@ -254,15 +254,15 @@ export class NotificationsService {
       isRead: false,
     });
 
-    // Emit notification via WebSocket if gateway is available
-    if (this.gateway) {
-      this.gateway.sendNotificationToUser(userId, notification);
+    // Emit notification via SSE if service is available
+    if (this.sseService) {
+      this.sseService.sendNotificationToUser(userId, notification);
 
       // Also send updated unread count
       const unreadCount = await this.notificationRepository.count({
         where: { userId, isRead: false },
       });
-      this.gateway.sendUnreadCountToUser(userId, unreadCount);
+      this.sseService.sendUnreadCountToUser(userId, unreadCount);
     }
 
     return notification;

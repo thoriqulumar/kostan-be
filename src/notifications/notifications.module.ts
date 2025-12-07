@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { NotificationsScheduler } from './notifications.scheduler';
-import { NotificationsGateway } from './notifications.gateway';
+import { NotificationsSseService } from './notifications.sse';
+import { SseHeartbeatScheduler } from './sse-heartbeat.scheduler';
 import { Notification } from './entities/notification.entity';
 import { User } from '../users/entities/user.entity';
 import { Room } from '../rooms/entities/rooms.entity';
@@ -29,8 +30,19 @@ import { PaymentReceipt } from '../payments/entities/payment-receipt.entity';
   providers: [
     NotificationsService,
     NotificationsScheduler,
-    NotificationsGateway,
+    NotificationsSseService,
+    SseHeartbeatScheduler,
   ],
   exports: [NotificationsService],
 })
-export class NotificationsModule {}
+export class NotificationsModule implements OnModuleInit {
+  constructor(
+    private notificationsService: NotificationsService,
+    private sseService: NotificationsSseService,
+  ) {}
+
+  onModuleInit() {
+    // Connect SSE service to notifications service
+    this.notificationsService.setSseService(this.sseService);
+  }
+}
