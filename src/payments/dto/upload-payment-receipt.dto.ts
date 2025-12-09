@@ -1,6 +1,6 @@
-import { IsInt, IsNumber, IsPositive, Min, Max } from 'class-validator';
+import { IsInt, IsNumber, IsPositive, Min, Max, IsString, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UploadPaymentReceiptDto {
   @ApiProperty({
@@ -33,4 +33,12 @@ export class UploadPaymentReceiptDto {
   @IsNumber()
   @IsPositive()
   amount: number;
+
+  @ApiPropertyOptional({
+    description: 'Optional description or note for this payment',
+    example: 'Pembayaran sewa bulan Oktober 2025',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

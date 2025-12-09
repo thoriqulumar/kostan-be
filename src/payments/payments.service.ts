@@ -47,24 +47,7 @@ export class PaymentsService {
       throw new NotFoundException('You are not currently renting any room');
     }
 
-    // Check if payment already exists for this month
-    const existingPayment = await this.paymentReceiptRepository.findOne({
-      where: {
-        userId,
-        roomId: room.id,
-        paymentMonth: uploadDto.paymentMonth,
-        paymentYear: uploadDto.paymentYear,
-        status: PaymentStatus.APPROVED,
-      },
-    });
-
-    if (existingPayment) {
-      throw new BadRequestException(
-        'Payment for this month has already been approved',
-      );
-    }
-
-    // Create payment receipt
+    // Create payment receipt (allow multiple uploads for the same month)
     const paymentReceipt = this.paymentReceiptRepository.create({
       userId,
       roomId: room.id,
@@ -72,6 +55,7 @@ export class PaymentsService {
       paymentYear: uploadDto.paymentYear,
       amount: uploadDto.amount,
       receiptFilePath,
+      description: uploadDto.description,
       status: PaymentStatus.PENDING,
     });
 
@@ -88,12 +72,14 @@ export class PaymentsService {
   async getPendingPayments(): Promise<PaymentReceipt[]> {
     return this.paymentReceiptRepository.find({
       where: { status: PaymentStatus.PENDING },
+      relations: ['user', 'room'],
       order: { createdAt: 'DESC' },
     });
   }
 
   async getAllPayments(): Promise<PaymentReceipt[]> {
     return this.paymentReceiptRepository.find({
+      relations: ['user', 'room'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -127,12 +113,6 @@ export class PaymentsService {
 
     if (!room) {
       throw new NotFoundException('Room not found');
-    }
-
-    if (Number(payment.amount) !== room.price) {
-      throw new BadRequestException(
-        `Payment amount (${payment.amount}) does not match room rent (${room.price})`,
-      );
     }
 
     // Update payment status

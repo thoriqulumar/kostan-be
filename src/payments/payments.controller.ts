@@ -58,6 +58,10 @@ export class PaymentsController {
           type: 'number',
           example: 1500000,
         },
+        description: {
+          type: 'string',
+          example: 'Pembayaran sewa bulan Oktober 2025',
+        },
       },
     },
   })

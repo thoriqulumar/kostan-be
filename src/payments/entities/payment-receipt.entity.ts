@@ -55,6 +55,9 @@ export class PaymentReceipt {
   @Column({ type: 'text', nullable: true })
   rejectionReason: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
