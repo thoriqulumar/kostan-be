@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -12,6 +13,8 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -99,14 +102,15 @@ export class AuthService {
 
     await this.usersService.updateResetToken(user.id, hashedToken, expires);
 
+    // Email notifications disabled
     // TODO: Send email with reset token
     // For now, return token in response (remove in production!)
-    console.log('Reset token:', resetToken);
+    this.logger.log(`Password reset requested for user: ${email} (email disabled)`);
 
     return {
-      message: 'If the email exists, a reset link will be sent',
-      // Remove this in production:
-      resetToken, // This should be sent via email
+      message: 'Password reset feature is currently disabled (email not configured)',
+      // Email notifications disabled - token should be sent via email in production
+      resetToken, // This should be sent via email when email is enabled
     };
   }
 
@@ -156,7 +160,7 @@ export class AuthService {
     // 2. Future token blacklisting implementation if needed
 
     // Optional: Log logout event
-    console.log(`User ${userId} logged out at ${new Date().toISOString()}`);
+    this.logger.log(`User ${userId} logged out at ${new Date().toISOString()}`);
 
     return {
       message: 'Logout successful',

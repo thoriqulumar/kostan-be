@@ -124,8 +124,8 @@ export class PaymentsService {
 
     // Create income record
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
     const income = this.incomeRepository.create({
@@ -142,11 +142,14 @@ export class PaymentsService {
     await this.incomeRepository.save(income);
 
     // Create notification for user (will be sent via WebSocket)
+    const notifTitle = `Pembayaran disetujui`;
+    const notifMessage = `Kamar: ${room.name} • Bulan: ${monthNames[payment.paymentMonth - 1]} ${payment.paymentYear} • Jumlah: Rp ${Number(payment.amount).toLocaleString('id-ID')}${payment.description ? ` • Keterangan: ${payment.description}` : ''}`;
+
     await this.notificationsService.createNotification(
       payment.userId,
       NotificationType.PAYMENT_APPROVED,
-      'Payment Approved',
-      `Your payment for ${monthNames[payment.paymentMonth - 1]} ${payment.paymentYear} has been approved`,
+      notifTitle,
+      notifMessage,
       payment.paymentMonth,
       payment.paymentYear,
     );
@@ -173,17 +176,25 @@ export class PaymentsService {
 
     await this.paymentReceiptRepository.save(payment);
 
+    // Get room details for notification
+    const room = await this.roomRepository.findOne({
+      where: { id: payment.roomId },
+    });
+
     // Create notification for user (will be sent via WebSocket)
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
+
+    const notifTitle = `Pembayaran ditolak`;
+    const notifMessage = `Kamar: ${room?.name || '-'} • Bulan: ${monthNames[payment.paymentMonth - 1]} ${payment.paymentYear} • Jumlah: Rp ${Number(payment.amount).toLocaleString('id-ID')}${payment.description ? ` • Keterangan: ${payment.description}` : ''} • Alasan: ${rejectDto.rejectionReason}`;
 
     await this.notificationsService.createNotification(
       payment.userId,
       NotificationType.PAYMENT_REJECTED,
-      'Payment Rejected',
-      `Your payment for ${monthNames[payment.paymentMonth - 1]} ${payment.paymentYear} has been rejected. Reason: ${rejectDto.rejectionReason}`,
+      notifTitle,
+      notifMessage,
       payment.paymentMonth,
       payment.paymentYear,
     );
@@ -193,7 +204,7 @@ export class PaymentsService {
 
   async getIncomeReport(year?: number): Promise<Income[]> {
     const query = this.incomeRepository.createQueryBuilder('income');
-    console.log({query})
+
     if (year) {
       query.where('income.paymentYear = :year', { year });
     }

@@ -54,7 +54,6 @@ export class RoomsController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
     async create(@Body() createRoomDto: CreateRoomDto) {
-        console.log({ createRoomDto })
         return this.roomsService.create(createRoomDto);
     }
 

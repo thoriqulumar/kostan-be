@@ -6,12 +6,14 @@ import { User } from '../users/entities/user.entity';
 import { Room } from '../rooms/entities/rooms.entity';
 import { PaymentReceipt, PaymentStatus } from '../payments/entities/payment-receipt.entity';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+// Email notifications disabled
+// import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private transporter: nodemailer.Transporter;
+  // Email notifications disabled
+  // private transporter: nodemailer.Transporter;
   private sseService: any; // Will be set by the module
 
   constructor(
@@ -25,6 +27,8 @@ export class NotificationsService {
     private paymentReceiptRepository: Repository<PaymentReceipt>,
     private configService: ConfigService,
   ) {
+    // Email notifications disabled
+    /*
     // Initialize email transporter
     const smtpHost = this.configService.get<string>('SMTP_HOST');
     const smtpPort = this.configService.get<number>('SMTP_PORT');
@@ -49,6 +53,7 @@ export class NotificationsService {
         'Email configuration not found. Email notifications will be disabled.',
       );
     }
+    */
   }
 
   async sendPaymentReminders(): Promise<void> {
@@ -59,23 +64,19 @@ export class NotificationsService {
       where: { isActive: true },
       relations: ['rentedUser'],
     });
-    console.log({rentedRooms})
+
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1; // 1-12
     const currentYear = currentDate.getFullYear();
     const currentDay = currentDate.getDate();
-    console.log({currentDay})
 
     for (const room of rentedRooms) {
-      console.log({room})
       if (!room.rentedUser || !room.rentStartDate) {
         continue;
       }
 
       const rentStartDate = new Date(room.rentStartDate);
-      console.log({rentStartDate})
       const rentStartDay = rentStartDate.getDate();
-      console.log({rentStartDay})
 
       // Check if today matches this user's rent start day
       // Each user gets reminder on their individual rent start date day each month
@@ -96,7 +97,6 @@ export class NotificationsService {
           status: PaymentStatus.APPROVED,
         },
       });
-      console.log({existingPayment})
 
       if (existingPayment) {
         this.logger.log(
@@ -114,7 +114,6 @@ export class NotificationsService {
           paymentYear: currentYear,
         },
       });
-      console.log({existingNotification})
 
       if (existingNotification) {
         this.logger.log(
@@ -143,18 +142,13 @@ export class NotificationsService {
     year: number,
     rentStartDay: number,
   ): Promise<void> {
-    console.log({user, room, month, year, rentStartDay})
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
 
-    const title = 'Pengingat Pembayaran Kost';
-    const message = `Ini adalah notifikasi pengingat untuk melakukan pembayaran kos pada.
-      <br>Bulan: <b>${monthNames[month - 1]} ${year}</b>.
-      <br>Kamar: <b>${room.name}</b>.
-      <br>Jumlah Yang Dibayarkan: <b>Rp ${room.price.toLocaleString('id-ID')}</b>.
-      <br>Tenggat Waktu: <b>${rentStartDay} ${monthNames[month - 1]} ${year}</b>.`;
+    const title = `Pengingat pembayaran kost ${monthNames[month - 1]}`;
+    const message = `Kamar: ${room.name} • Bulan: ${monthNames[month - 1]} ${year} • Jumlah: Rp ${room.price.toLocaleString('id-ID')}`;
 
     // Create notification in database (will be sent via WebSocket)
     const notification = await this.createNotification(
@@ -166,6 +160,8 @@ export class NotificationsService {
       year,
     );
 
+    // Email notifications disabled
+    /*
     // Send email if configured
     if (this.transporter) {
       try {
@@ -200,6 +196,10 @@ export class NotificationsService {
         `Notification created for ${user.email} (email disabled)`,
       );
     }
+    */
+    this.logger.log(
+      `Notification created for ${user.email} (email notifications disabled)`,
+    );
   }
 
   async getUserNotifications(userId: string): Promise<Notification[]> {

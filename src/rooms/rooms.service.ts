@@ -11,7 +11,6 @@ export class RoomsService {
     ) { }
 
     async create(roomData: Partial<Room>): Promise<Room> {
-        console.log({ roomData })
         const room = this.roomsRepository.create(roomData);
         return await this.roomsRepository.save(room);
     }

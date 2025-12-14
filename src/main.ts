@@ -11,8 +11,11 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Enable CORS for frontend
+  const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:5173';
+  const allowedOrigins = corsOrigin.split(',').map(origin => origin.trim());
+
   app.enableCors({
-    origin: ['http://localhost:3001', 'http://localhost:5173'], // React dev servers
+    origin: allowedOrigins,
     credentials: true,
   });
 
