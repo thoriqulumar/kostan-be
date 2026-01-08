@@ -54,11 +54,11 @@ export class Income {
   @JoinColumn({ name: 'roomId' })
   room: Room;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'confirmedByAdminId' })
   confirmedByAdmin: User;
 }

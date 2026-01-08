@@ -64,7 +64,7 @@ export class PaymentReceipt {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
@@ -72,7 +72,7 @@ export class PaymentReceipt {
   @JoinColumn({ name: 'roomId' })
   room: Room;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'confirmedByAdminId' })
   confirmedByAdmin: User;
 }

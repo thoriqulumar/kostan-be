@@ -56,7 +56,7 @@ export class Notification {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
   user: User;
 }

@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   OneToOne,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
@@ -91,6 +92,10 @@ export class User {
   })
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ApiHideProperty()
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToOne(() => Room, (room) => room.rentedUser)
   rentedRoom: Room;

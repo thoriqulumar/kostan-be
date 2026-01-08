@@ -31,7 +31,9 @@ export class UsersService {
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.rentedRoom', 'room')
         .where('room.id IS NOT NULL')
-        .andWhere(filters?.role ? 'user.role = :role' : '1=1', { role: filters?.role })
+        .andWhere(filters?.role ? 'user.role = :role' : '1=1', {
+          role: filters?.role,
+        })
         .select([
           'user.id',
           'user.email',
@@ -51,7 +53,9 @@ export class UsersService {
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.rentedRoom', 'room')
         .where('room.id IS NULL')
-        .andWhere(filters?.role ? 'user.role = :role' : '1=1', { role: filters?.role })
+        .andWhere(filters?.role ? 'user.role = :role' : '1=1', {
+          role: filters?.role,
+        })
         .select([
           'user.id',
           'user.email',
@@ -67,7 +71,15 @@ export class UsersService {
     // No room status filter - return all users matching role filter
     return await this.usersRepository.find({
       where,
-      select: ['id', 'email', 'fullName', 'phone', 'role', 'isActive', 'createdAt'],
+      select: [
+        'id',
+        'email',
+        'fullName',
+        'phone',
+        'role',
+        'isActive',
+        'createdAt',
+      ],
     });
   }
 
@@ -138,7 +150,7 @@ export class UsersService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+    await this.usersRepository.softRemove(user);
   }
 
   async toggleActive(id: string): Promise<User> {

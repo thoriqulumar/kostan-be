@@ -100,7 +100,7 @@ export class Expense {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User, { eager: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'recordedByAdminId' })
   recordedByAdmin: User;
 }
