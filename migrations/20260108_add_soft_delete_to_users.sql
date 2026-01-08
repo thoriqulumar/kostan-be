@@ -38,10 +38,11 @@ BEGIN
     DECLARE
         constraint_name_var TEXT;
     BEGIN
-        SELECT constraint_name INTO constraint_name_var
+        SELECT tc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
         WHERE tc.table_name = 'payment_receipts' 
             AND kcu.column_name = 'confirmedByAdminId'
             AND tc.constraint_type = 'FOREIGN KEY'
@@ -66,10 +67,11 @@ BEGIN
     DECLARE
         constraint_name_var TEXT;
     BEGIN
-        SELECT constraint_name INTO constraint_name_var
+        SELECT tc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
         WHERE tc.table_name = 'notifications' 
             AND kcu.column_name = 'userId'
             AND tc.constraint_type = 'FOREIGN KEY'
@@ -92,10 +94,11 @@ DO $$
 BEGIN
     DECLARE
         constraint_name_var TEXT;
-    BEGIN
-        SELECT constraint_name INTO constraint_name_var
+    BEGINtc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
+            ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
             ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'incomes' 
             AND kcu.column_name = 'userId'
@@ -118,10 +121,11 @@ END $$;
 DO $$ 
 BEGIN
     DECLARE
-        constraint_name_var TEXT;
-    BEGIN
-        SELECT constraint_name INTO constraint_name_var
+        constratc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu 
+            ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'incomes' 
@@ -145,10 +149,11 @@ END $$;
 DO $$ 
 BEGIN
     DECLARE
-        constraint_name_var TEXT;
-    BEGIN
-        SELECT constraint_name INTO constraint_name_var
+        constratc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu 
+            ON tc.constraint_name = kcu.constraint_name
+            AND tc.constraint_schema = kcu.constraint_schema
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'expenses' 
