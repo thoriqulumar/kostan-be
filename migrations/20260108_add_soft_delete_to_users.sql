@@ -94,12 +94,12 @@ DO $$
 BEGIN
     DECLARE
         constraint_name_var TEXT;
-    BEGINtc.constraint_name INTO constraint_name_var
+    BEGIN
+        SELECT tc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
             AND tc.constraint_schema = kcu.constraint_schema
-            ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'incomes' 
             AND kcu.column_name = 'userId'
             AND tc.constraint_type = 'FOREIGN KEY'
@@ -121,13 +121,13 @@ END $$;
 DO $$ 
 BEGIN
     DECLARE
-        constratc.constraint_name INTO constraint_name_var
+        constraint_name_var TEXT;
+    BEGIN
+        SELECT tc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
             AND tc.constraint_schema = kcu.constraint_schema
-        JOIN information_schema.key_column_usage kcu 
-            ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'incomes' 
             AND kcu.column_name = 'confirmedByAdminId'
             AND tc.constraint_type = 'FOREIGN KEY'
@@ -149,13 +149,13 @@ END $$;
 DO $$ 
 BEGIN
     DECLARE
-        constratc.constraint_name INTO constraint_name_var
+        constraint_name_var TEXT;
+    BEGIN
+        SELECT tc.constraint_name INTO constraint_name_var
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu 
             ON tc.constraint_name = kcu.constraint_name
             AND tc.constraint_schema = kcu.constraint_schema
-        JOIN information_schema.key_column_usage kcu 
-            ON tc.constraint_name = kcu.constraint_name
         WHERE tc.table_name = 'expenses' 
             AND kcu.column_name = 'recordedByAdminId'
             AND tc.constraint_type = 'FOREIGN KEY'
