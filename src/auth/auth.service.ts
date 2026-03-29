@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto, ResetPasswordDto } from './dto/auth.dto';
 import * as crypto from 'crypto';
@@ -18,6 +19,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -88,7 +90,7 @@ export class AuthService {
   async requestPasswordReset(email: string) {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Don't reveal if user exists or not
+      // Don't reveal if user exists or not for security
       return { message: 'If the email exists, a reset link will be sent' };
     }
 
@@ -102,16 +104,27 @@ export class AuthService {
 
     await this.usersService.updateResetToken(user.id, hashedToken, expires);
 
-    // Email notifications disabled
-    // TODO: Send email with reset token
-    // For now, return token in response (remove in production!)
-    this.logger.log(`Password reset requested for user: ${email} (email disabled)`);
+    // Send password reset email
+    const emailSent = await this.mailService.sendPasswordResetEmail(
+      user.email,
+      user.fullName,
+      resetToken,
+    );
 
-    return {
-      message: 'Password reset feature is currently disabled (email not configured)',
-      // Email notifications disabled - token should be sent via email in production
-      resetToken, // This should be sent via email when email is enabled
-    };
+    if (emailSent) {
+      this.logger.log(`Password reset email sent to: ${email}`);
+      return { message: 'If the email exists, a reset link will be sent' };
+    } else {
+      this.logger.warn(`Password reset requested for ${email} but email not configured`);
+      // In development, return token for testing when email is not configured
+      if (!this.mailService.isEmailConfigured()) {
+        return {
+          message: 'Email not configured. For development, use this token:',
+          resetToken, // Only return in dev when email is not configured
+        };
+      }
+      return { message: 'If the email exists, a reset link will be sent' };
+    }
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

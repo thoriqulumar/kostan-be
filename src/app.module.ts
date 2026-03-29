@@ -9,6 +9,7 @@ import { RentalsModule } from './rentals/rentals.module';
 import { PaymentsModule } from './payments/payments.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ExpensesModule } from './expenses/expenses.module';
     ScheduleModule.forRoot(),
 
     // Feature Modules
+    MailModule,
     AuthModule,
     UsersModule,
     RoomsModule,
