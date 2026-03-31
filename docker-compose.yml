@@ -46,6 +46,13 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
       MAX_FILE_SIZE: 5242880
       UPLOAD_DESTINATION: ./uploads
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:80}
     volumes:
       - ./uploads:/app/uploads
       - ./logs:/app/logs
@@ -71,7 +78,7 @@ services:
     container_name: kostan_frontend
     restart: unless-stopped
     ports:
-      - '80:80'
+      - '8080:80'
     depends_on:
       - backend
     networks:
