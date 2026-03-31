@@ -62,7 +62,7 @@ export class MailService {
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Kostan</h1>
+          <h1 style="color: white; margin: 0; font-size: 28px;">Wisma Jati</h1>
           <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Password Reset Request</p>
         </div>
         
@@ -100,7 +100,7 @@ export class MailService {
         </div>
         
         <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-          <p style="margin: 0;">This email was sent by Kostan Management System</p>
+          <p style="margin: 0;">This email was sent by Wisma Jati Management System</p>
           <p style="margin: 5px 0 0 0;">If you didn't request this, please ignore this email.</p>
         </div>
       </body>

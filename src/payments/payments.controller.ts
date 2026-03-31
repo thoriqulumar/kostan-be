@@ -232,6 +232,23 @@ export class PaymentsController {
     return this.paymentsService.deleteReceipt(id, userId, userRole);
   }
 
+  @Get('income/years')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get all years with income data (Admin only)' })
+  async getIncomeYears() {
+    return this.paymentsService.getIncomeYears();
+  }
+
+  @Get('income/monthly-balance')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Get monthly balance report (Admin only)' })
+  async getMonthlyBalance(
+    @Query('month') month: number,
+    @Query('year') year: number,
+  ) {
+    return this.paymentsService.getMonthlyBalance(Number(month), Number(year));
+  }
+
   @Get('income/report')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get income report (Admin only)' })

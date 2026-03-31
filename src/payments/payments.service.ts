@@ -11,6 +11,7 @@ import { PaymentReceipt, PaymentStatus } from './entities/payment-receipt.entity
 import { Income } from './entities/income.entity';
 import { Room } from '../rooms/entities/rooms.entity';
 import { User, UserRole } from '../users/entities/user.entity';
+import { Expense } from '../expenses/entities/expense.entity';
 import { UploadPaymentReceiptDto } from './dto/upload-payment-receipt.dto';
 import { RejectPaymentDto } from './dto/reject-payment.dto';
 import { NotificationType } from '../notifications/entities/notification.entity';
@@ -30,6 +31,8 @@ export class PaymentsService {
     private roomRepository: Repository<Room>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Expense)
+    private expenseRepository: Repository<Expense>,
     private notificationsService: NotificationsService,
   ) {}
 
@@ -202,6 +205,16 @@ export class PaymentsService {
     return payment;
   }
 
+  async getIncomeYears(): Promise<number[]> {
+    const result = await this.incomeRepository
+      .createQueryBuilder('income')
+      .select('DISTINCT income.paymentYear', 'year')
+      .orderBy('income.paymentYear', 'DESC')
+      .getRawMany();
+
+    return result.map((r) => parseInt(r.year));
+  }
+
   async getIncomeReport(year?: number): Promise<Income[]> {
     const query = this.incomeRepository.createQueryBuilder('income');
 
@@ -300,6 +313,106 @@ export class PaymentsService {
     }
 
     return receipt;
+  }
+
+  async getMonthlyBalance(month: number, year: number): Promise<{
+    month: number;
+    year: number;
+    previousBalance: number;
+    income: number;
+    expenses: number;
+    currentBalance: number;
+    incomeDetails: {
+      description: string;
+      amount: number;
+      roomName: string;
+      tenantName: string;
+      date: string;
+    }[];
+    expenseDetails: {
+      category: string;
+      description: string;
+      amount: number;
+      date: string;
+    }[];
+  }> {
+    // Sum all incomes strictly before the given month/year
+    const prevIncomeResult = await this.incomeRepository
+      .createQueryBuilder('income')
+      .select('SUM(income.amount)', 'total')
+      .where(
+        '(income.paymentYear < :year) OR (income.paymentYear = :year AND income.paymentMonth < :month)',
+        { year, month },
+      )
+      .getRawOne();
+
+    // Sum all expenses strictly before the given month/year
+    const prevExpenseResult = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .select('SUM(expense.amount)', 'total')
+      .where(
+        '(expense.expenseYear < :year) OR (expense.expenseYear = :year AND expense.expenseMonth < :month)',
+        { year, month },
+      )
+      .getRawOne();
+
+    const previousBalance =
+      parseFloat(prevIncomeResult?.total || '0') -
+      parseFloat(prevExpenseResult?.total || '0');
+
+    // Income detail records for this specific month/year
+    const incomeRecords = await this.incomeRepository
+      .createQueryBuilder('income')
+      .leftJoinAndSelect('income.room', 'room')
+      .leftJoinAndSelect('income.user', 'user')
+      .where('income.paymentYear = :year AND income.paymentMonth = :month', { year, month })
+      .orderBy('income.createdAt', 'ASC')
+      .getMany();
+
+    // Expense detail records for this specific month/year
+    const expenseRecords = await this.expenseRepository
+      .createQueryBuilder('expense')
+      .where('expense.expenseYear = :year AND expense.expenseMonth = :month', { year, month })
+      .orderBy('expense.expenseDate', 'ASC')
+      .getMany();
+
+    const income = incomeRecords.reduce((sum, r) => sum + parseFloat(r.amount as any), 0);
+    const expenses = expenseRecords.reduce((sum, r) => sum + parseFloat(r.amount as any), 0);
+    const currentBalance = previousBalance + income - expenses;
+
+    const categoryLabels: Record<string, string> = {
+      utilities: 'Utilitas',
+      maintenance: 'Pemeliharaan',
+      supplies: 'Perlengkapan',
+      internet: 'Internet',
+      salary: 'Gaji',
+      tax: 'Pajak',
+      other: 'Lainnya',
+    };
+
+    return {
+      month,
+      year,
+      previousBalance,
+      income,
+      expenses,
+      currentBalance,
+      incomeDetails: incomeRecords.map((r) => ({
+        description: r.description,
+        amount: parseFloat(r.amount as any),
+        roomName: r.room?.name || '-',
+        tenantName: r.user?.fullName || '-',
+        date: r.createdAt.toISOString().split('T')[0],
+      })),
+      expenseDetails: expenseRecords.map((r) => ({
+        category: categoryLabels[r.category] || r.category,
+        description: r.description,
+        amount: parseFloat(r.amount as any),
+        date: r.expenseDate
+          ? new Date(r.expenseDate).toISOString().split('T')[0]
+          : r.createdAt.toISOString().split('T')[0],
+      })),
+    };
   }
 
   async deleteReceipt(
